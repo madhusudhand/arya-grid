@@ -1,0 +1,131 @@
+$gray-50: lightgray;
+$gray-200: lightgray;
+$gray-400: gray;
+$gray-600: gray;
+$gray-900: darkgray;
+$blue-50: lightblue;
+$white: white;
+
+$row-hieght: 40;
+
+.arya-grid {
+  height: 100%;
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
+  .grid-row-container {
+    width: 100%;
+  }
+  .grid-row {
+    display: flex;
+    flex-flow: row nowrap;
+    cursor: pointer;
+  }
+
+  .grid-cell {
+    padding: 0.75rem;
+    overflow: hidden;
+    .cell-container {
+      display: inline-flex;
+    }
+    .cell-checkbox {
+      margin-top: 2px;
+    }
+  }
+
+  .grid-header {
+    color: $gray-900;
+    font-weight: bold;
+    border-bottom: 1px solid $gray-400;
+    background-color: $white;
+    position: sticky;
+    top:0;
+    z-index: 1;
+    min-width: 600px;
+
+    .grid-row {
+      border-bottom: 1px solid $gray-400;
+    }
+
+    .grid-cell {
+      display: flex;
+
+      &.left-align {
+        .filter-icon-holder {
+          margin-left: auto;
+        }
+      }
+
+      &.right-align {
+        justify-content: flex-end;
+        .sort-icon-holder {
+          order: -1;
+        }
+        .filter-icon-holder {
+          order: -2;
+          flex-grow: 1;
+        }
+      }
+
+    }
+  }
+
+  .grid-body {
+    height: 100%;
+    min-width: 600px;
+    .grid-row:hover {
+      background-color: $blue-50 !important;
+    }
+    .grid-cell {
+      &.right-align .cell-container {
+        justify-content: flex-end;
+      }
+    }
+    .error-container {
+      color: $gray-600;
+      padding-left: 0.75rem;
+      margin: 1rem 0;
+    }
+  }
+
+  // These styles for table striping
+  &.grid-striped {
+    .grid-body {
+      arya-grid-row:nth-of-type(odd) .grid-row {
+        background: $gray-50;
+      }
+    }
+    .bg-striping {
+      background-image: repeating-linear-gradient(
+        $gray-50,
+        $gray-50 #{$row-hieght}px,
+        transparent #{$row-hieght}px,
+        transparent #{$row-hieght*2}px
+      );
+    }
+  }
+
+  // These styles for bordered table
+  &.grid-bordered {
+    .grid-cell:not(:last-child) {
+      border-right: 1px solid $gray-400;
+    }
+  }
+
+  .no-wrap {
+    .cell-container {
+      width: 100%;
+      .cell-content {
+        overflow: hidden;
+        span {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}

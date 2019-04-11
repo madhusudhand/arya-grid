@@ -1,0 +1,15 @@
+<div class="grid-row-container" [style.height.px]="rowHieght">
+  <div class="grid-row" (click)="rowSelect($event, row)">
+    <ng-container *ngFor="let column of columns; index as ind">
+      <div class="grid-cell grid-col-{{ind+1}} {{column.alignment}}-align" 
+        [ngClass]="{'hidden':column.hide}" 
+        [ngStyle]="{'width': column.widthPercent}">
+        <div class="cell-container">
+          <span class="cell-content">
+            {{row[column.key]}}
+          </span>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

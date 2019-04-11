@@ -1,0 +1,45 @@
+<div
+  class="arya-grid grid-striped"
+  (scroll)="onScroll($event)"
+  (touchmove)="onScroll($event)">
+
+  <!-- placeholder for header -->
+  <ng-container *ngTemplateOutlet="headerTemplate"></ng-container>
+
+  <div class="grid-body" [ngClass]="{'no-wrap': !wrap}" [ngStyle]="gridStyles">
+    <div class="error-container" *ngIf="showErrorMessage else gridBodyContainer">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <ng-template #gridBodyContainer>
+      <div>
+        <div class="bg-striping" [style.height.px]="preRowHeight"></div>
+        <ng-container *ngFor="let row of renderableData">
+          <arya-grid-row
+            [row]="row"
+            [columns]="columns"
+            [rowHieght]="rowHieght"
+            (onRowSelect)="onRowSelect($event.originalEvent,$event.row)">
+          </arya-grid-row>
+        </ng-container>
+        <div class="bg-striping" [style.height.px]="postRowHeight"></div>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<ng-template #headerTemplate>
+  <div [ngStyle]="gridStyles" class="grid-header mx-0">
+    <div class="grid-row head-labels-row">
+      <ng-container *ngFor="let cell of columns; index as ind">
+        <div class="grid-cell grid-col-{{ind+1}} {{cell.alignment}}-align"
+          [ngStyle]="{'width': cell.widthPercent}"
+          (click)="onColumnClick($event, cell)">
+          <div class="label-holder">
+            <span class="header-name">{{cell.label}}</span>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
