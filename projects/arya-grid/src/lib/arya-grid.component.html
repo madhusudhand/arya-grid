@@ -1,4 +1,5 @@
-<div
+<arya-virtual-scroll
+  [itemBuffer]="itemBuffer"
   class="arya-grid grid-striped"
   (scroll)="onScroll($event)"
   (touchmove)="onScroll($event)">
@@ -12,7 +13,7 @@
     </div>
 
     <ng-template #gridBodyContainer>
-      <div>
+      <div #virtualContainer>
         <div class="bg-striping" [style.height.px]="preRowHeight"></div>
         <ng-container *ngFor="let row of renderableData">
           <arya-grid-row
@@ -26,7 +27,7 @@
       </div>
     </ng-template>
   </div>
-</div>
+</arya-virtual-scroll>
 
 <ng-template #headerTemplate>
   <div [ngStyle]="gridStyles" class="grid-header mx-0">

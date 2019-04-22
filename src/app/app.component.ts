@@ -29,7 +29,7 @@ export class AppComponent {
     }
   ];
 
-  data = Array(100).fill(1).map((ele, index) => ({
+  data = Array(10000).fill(1).map((ele, index) => ({
     id: index + 1,
     name: 'Name ' + (index + 1),
     age: parseInt(Math.random() * 100 + ''),

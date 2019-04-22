@@ -1,10 +1,12 @@
 import {
-  Component, OnInit, OnDestroy, Input, SimpleChanges,
-  OnChanges, ChangeDetectionStrategy, ViewEncapsulation,
+  Component, OnInit, OnDestroy, Input, HostListener, SimpleChanges,
+  OnChanges, ChangeDetectionStrategy, ViewEncapsulation, ElementRef, ViewChild,
   ChangeDetectorRef,
   AfterViewInit
 } from '@angular/core';
 import * as cloneDeep from 'lodash.clonedeep';
+import { debounceTime } from 'rxjs/operators';
+import { AryaVirtualScrollComponent } from './arya-virtual-scroll.component';
 
 interface Column {
   key: string; // key of the field in the given data object
@@ -54,7 +56,7 @@ export class AryaGridComponent implements OnInit, OnDestroy, OnChanges, AfterVie
   }
   set renderableData(value) {
     this._renderableData = value;
-    // this.setPrePostRowHeights();
+    this.setPrePostRowHeights();
   }
 
   _filteredData = [];
@@ -63,15 +65,27 @@ export class AryaGridComponent implements OnInit, OnDestroy, OnChanges, AfterVie
   }
   set filteredData(value) {
     this._filteredData = value;
+    this.setRenderableIndexes(this.getRenderableIndexes(
+      this.vScroll.elementRef.nativeElement,
+      this._filteredData.length
+    ));
     this.renderableData = this._filteredData.slice(this.startRenderableIndex, this.endRenderableIndex);
+    this.setContainerHeight();
   }
+
+  @ViewChild(AryaVirtualScrollComponent) vScroll: AryaVirtualScrollComponent;
+  @ViewChild('virtualContainer') virtualContainer: ElementRef;
 
   constructor(private ref: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.vScroll.elementScrolled
+      .pipe(debounceTime(100))
+      .subscribe(e => this.onVirtualScroll(e));
   }
 
   ngAfterViewInit() {
+    this.onVirtualScroll({ target: this.vScroll.elementRef.nativeElement });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -123,5 +137,65 @@ export class AryaGridComponent implements OnInit, OnDestroy, OnChanges, AfterVie
 
   onScroll(event) {
     //
+  }
+
+  onVirtualScroll(e) {
+    const target: any = e.target;
+    const { startRenderableIndex, endRenderableIndex } = this.getRenderableIndexes(target, this.filteredData.length);
+
+    if (
+      startRenderableIndex === this.startRenderableIndex &&
+      endRenderableIndex === this.endRenderableIndex
+    ) {
+      // change detection not required
+      return;
+    }
+
+    // setRenderableIndexes
+    this.setRenderableIndexes({ startRenderableIndex, endRenderableIndex});
+    this.renderableData = this.filteredData.slice(startRenderableIndex, endRenderableIndex);
+  }
+
+  setContainerHeight() {
+    if (!this.virtualContainer) {
+      return;
+    }
+    const height = this.filteredData.length * this.vScroll.itemHeight;
+    this.virtualContainer.nativeElement.style.height = height;
+  }
+
+  setPrePostRowHeights() {
+    if (!this.vScroll) {
+      return;
+    }
+    this.preRowHeight = this.vScroll.itemHeight * this.startRenderableIndex;
+    this.postRowHeight = this.vScroll.itemHeight * (this.filteredData.length - this.endRenderableIndex);
+    setTimeout(() => {
+      this.ref.markForCheck();
+    }, 0);
+  }
+
+  setRenderableIndexes({ startRenderableIndex, endRenderableIndex}) {
+    this.startRenderableIndex = startRenderableIndex;
+    this.endRenderableIndex = endRenderableIndex;
+  }
+
+  getRenderableIndexes(target, limit = 0) {
+    const scrollTop = target.scrollTop;
+    const height = target.clientHeight;
+    const scrollBottom = scrollTop + height;
+
+    const itemHeight = this.vScroll.itemHeight;
+    const itemBuffer = this.vScroll.itemBuffer;
+
+    let startIndex = parseInt('' + scrollTop / itemHeight, 10) - itemBuffer;
+    // return even index to preserve grid striping
+    startIndex = startIndex % 2 === 0 ? startIndex : startIndex - 1;
+    const endIndex = itemBuffer + parseInt('' + scrollBottom / itemHeight, 10);
+
+    return {
+      startRenderableIndex: Math.max(0, startIndex),
+      endRenderableIndex: Math.min(limit, endIndex),
+    };
   }
 }
