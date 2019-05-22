@@ -80,7 +80,7 @@ export class AryaGridComponent implements OnInit, OnDestroy, OnChanges, AfterVie
 
   ngOnInit() {
     this.vScroll.elementScrolled
-      .pipe(debounceTime(100))
+      .pipe(debounceTime(50))
       .subscribe(e => this.onVirtualScroll(e));
   }
 
